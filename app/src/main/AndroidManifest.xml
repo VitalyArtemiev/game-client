@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="artemiev.contact">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme.NoActionBar">
+        <activity android:name=".aMainMenu">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".aServers"
+            android:parentActivityName=".aMainMenu">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="artemiev.contact.aMainMenu" />
+        </activity>
+
+        <activity
+            android:name=".aGameRoom"
+            android:parentActivityName=".aMainMenu">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="artemiev.contact.aMainMenu" />
+        </activity>
+
+        <activity
+            android:name=".aSettings"
+            android:label="@string/title_activity_a_settings"
+            android:parentActivityName=".aMainMenu">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="artemiev.contact.aMainMenu" />
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.games.APP_ID"
+            android:value="@string/app_id" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+    </application>
+
+</manifest>

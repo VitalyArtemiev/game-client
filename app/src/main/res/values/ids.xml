@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- this file is probably redundant, use games-ids.xml -->
+    <!--string name="app_id">11530223150</string-->
+    <!--string name="achievement_hello_world" translatable="false">CggIrvyE-ioQAhAB</string-->
+</resources>
