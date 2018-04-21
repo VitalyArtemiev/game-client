@@ -102,6 +102,7 @@ public class aServers extends AppCompatActivity
     @Override
     public void onEventFailed(Object obj) {
         textConnection.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.GONE);
 
         String err;
 

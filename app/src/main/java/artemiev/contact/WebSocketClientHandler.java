@@ -74,7 +74,9 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         if (frame instanceof TextWebSocketFrame) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
             System.out.println("WebSocket Client received message: " + textFrame.text());
+
             tryParseTextResponse(textFrame.text());
+
         } else if (frame instanceof PongWebSocketFrame) {
             System.out.println("WebSocket Client received pong");
         } else if (frame instanceof CloseWebSocketFrame) {
@@ -95,6 +97,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
                     break;
 
                 int roomNumber = Integer.getInteger(tokens[1]);
+                System.out.println("WTFUUUUUUUUU");
                 if (roomNumber == 0) {
                     //ToDo handle rooms not found
                     if (EventListener != null)
@@ -135,8 +138,6 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
 
             }
         }
-
-
     }
 
     @Override

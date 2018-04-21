@@ -3,7 +3,9 @@ package artemiev.contact;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -41,10 +43,10 @@ import java.net.URI;
  */
 public final class WebSocketClient /*implements ClientInterface*/{
     static final String URL = System.getProperty("url", "ws://192.168.1.34:8080/websocket");
-    //private MyEventListener EventListener;
+    private static MyEventListener EventListener;
 
     public static void setEventListener(MyEventListener el) {
-        //EventListener = el;
+        EventListener = el;
         handler.setEventListener(el);
     }
 
@@ -94,6 +96,7 @@ public final class WebSocketClient /*implements ClientInterface*/{
                                     uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
 
             Bootstrap b = new Bootstrap();
+            b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000); //Todo: tweak timeout
             b.group(group)
                     .channel(NioSocketChannel.class)
                     .handler(new ChannelInitializer<SocketChannel>() {
@@ -111,18 +114,38 @@ public final class WebSocketClient /*implements ClientInterface*/{
                         }
                     });
 
-            ch = b.connect(uri.getHost(), port).sync().channel();
+            ChannelFuture future = b.connect(uri.getHost(), port);
+            future.sync();  //Todo: possibly add listener for a successful connection instead of sync
+
+            if (!future.isSuccess()) {
+                throw new Exception(future.cause());
+            }
+            ch = future.channel();
+
             handler.handshakeFuture().sync();
 
 
         } catch (Exception e) {
-            e.getMessage();
             group.shutdownGracefully();
+            throw e;
         }
     }
 
     public static void shutdown() {
         group.shutdownGracefully();
+    }
+
+    private static boolean connectionActive(boolean tryReconnect) { //ToDO: this is messy
+        boolean result = ch != null;
+        try {
+            if (tryReconnect && !result)
+                startup();
+            result = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            return result;
+        }
     }
 
     public static void pingServer() {
@@ -138,7 +161,7 @@ public final class WebSocketClient /*implements ClientInterface*/{
     private static String formRequest() {//variable parameter type and number
         String result = "";
 
-        //form correct request
+        //Todo: form correct request
 
         return result;
     }
@@ -149,8 +172,25 @@ public final class WebSocketClient /*implements ClientInterface*/{
     }
 
     public static void fetchRoomList() {
-        WebSocketFrame frame = new TextWebSocketFrame("getRoomList\n"); //use formRequest()
-        ch.writeAndFlush(frame);
+        if (connectionActive(true)) {
+            WebSocketFrame frame = new TextWebSocketFrame("getRoomList\n"); //Todo: use formRequest()
+
+            ChannelFuture fut = ch.writeAndFlush(frame);
+
+            try {
+                fut.sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (!fut.isSuccess()) {
+                EventListener.onEventFailed("Failed to send request");
+            }
+
+        } else {
+            EventListener.onEventFailed("Failed to establish connection");
+        }
+
     }
 
     public static void fetchRoomData(int roomID) {

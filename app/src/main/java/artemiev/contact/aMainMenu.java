@@ -1,5 +1,6 @@
 package artemiev.contact;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -71,6 +72,15 @@ public class aMainMenu extends AppCompatActivity implements
         try {
             WebSocketClient.startup();
         } catch (Exception e) {
+            AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(aMainMenu.this);
+
+            dlgAlert.setMessage(e.getMessage());
+
+            dlgAlert.setTitle("Error while contacting server");
+            dlgAlert.setPositiveButton("OK", null);
+            dlgAlert.setCancelable(true);
+            dlgAlert.create().show();
+
             e.printStackTrace();
         }
     }
