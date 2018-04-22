@@ -49,7 +49,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Object msg) {
         Channel ch = ctx.channel();
         if (!handshaker.isHandshakeComplete()) {
             try {
@@ -96,8 +96,8 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
                 if (l < 2)
                     break;
 
-                int roomNumber = Integer.getInteger(tokens[1]);
-                System.out.println("WTFUUUUUUUUU");
+                int roomNumber = Integer.parseInt(tokens[1]);
+
                 if (roomNumber == 0) {
                     //ToDo handle rooms not found
                     if (EventListener != null)
@@ -118,15 +118,16 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
                             EventListener.onEventFailed("roomParams fail");
                     }
 
-                    int roomId = Integer.getInteger(roomParams[0]);
+                    int roomId = Integer.parseInt(roomParams[0]);
                     String roomName = roomParams[1];
-                    int playerCount = Integer.getInteger(roomParams[2]);
-                    int playerLimit = Integer.getInteger(roomParams[3]);
+                    int playerCount = Integer.parseInt(roomParams[2]);
+                    int playerLimit = Integer.parseInt(roomParams[3]);
 
                     rooms.add(new Room(roomId, roomName, playerCount, playerLimit));
-                    if (EventListener != null)
-                        EventListener.onEventCompleted(rooms);
                 }
+
+                if (EventListener != null)
+                    EventListener.onEventCompleted(rooms);
 
                 break;
             }

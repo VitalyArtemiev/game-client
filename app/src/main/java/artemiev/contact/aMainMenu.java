@@ -47,13 +47,13 @@ public class aMainMenu extends AppCompatActivity implements
 
         Toast.makeText(context, text, duration).show();
 
-       mGoogleApiClient = new GoogleApiClient.Builder(this)
+       /*mGoogleApiClient = new GoogleApiClient.Builder(this)Todo: reenable
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API)
                 .addScope(Games.SCOPE_GAMES)
                 // add other APIs and scopes here as needed
-                .build();
+                .build();*/
 
         bPlay = (Button) findViewById(R.id.BPlay);
         //bPlay.setOnClickListener(this);
@@ -123,7 +123,7 @@ public class aMainMenu extends AppCompatActivity implements
             case R.id.sign_in_button: {
                 // start the asynchronous sign in flow
                 mSignInClicked = true;
-                mGoogleApiClient.reconnect();
+                //mGoogleApiClient.reconnect();Todo: reenable
                 break;
             }
 
@@ -131,7 +131,7 @@ public class aMainMenu extends AppCompatActivity implements
                 // sign out.
                 mSignInClicked = false;
                 Games.signOut(mGoogleApiClient);
-                //mGoogleApiClient.disconnect();
+                //mGoogleApiClient.disconnect();Todo: reenable
 
                 // show sign-in button, hide the sign-out button
                 bSignIn.setVisibility(View.VISIBLE);
@@ -157,7 +157,7 @@ public class aMainMenu extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect(); //TODO: SIGN_IN_MODE_OPTIONAL
+//        mGoogleApiClient.connect(); //TODO: SIGN_IN_MODE_OPTIONAL  Todo: reenable
         Toast.makeText(getApplicationContext(), "OnStart", Toast.LENGTH_SHORT).show();
     }
 
@@ -165,7 +165,7 @@ public class aMainMenu extends AppCompatActivity implements
     protected void onDestroy() {
         WebSocketClient.shutdown();
         super.onDestroy();
-        mGoogleApiClient.disconnect();
+ //       mGoogleApiClient.disconnect(); Todo: reenable
         Toast.makeText(getApplicationContext(), "OnDestroy", Toast.LENGTH_SHORT).show();
     }
 
@@ -179,8 +179,8 @@ public class aMainMenu extends AppCompatActivity implements
 
     @Override
     public void onConnectionSuspended(int i) {
-        // Attempt to reconnect
-        mGoogleApiClient.connect();
+        // Attempt to reconnect Todo: reenable
+  //      mGoogleApiClient.connect();
     }
 
     private static int RC_SIGN_IN = 9001;

@@ -67,42 +67,46 @@ public class aServers extends AppCompatActivity
     };
 
     @Override
-    public void onEventCompleted(Object obj) {
-        progressBar.setVisibility(View.GONE);
-        textConnection.setVisibility(View.INVISIBLE);
+    public void onEventCompleted(final Object obj) {
+        runOnUiThread(new Runnable() {//Todo: maybe use handler/messages instead
+            @Override
+            public void run() {
+                if (obj instanceof ArrayList) {
+                    try {
+                        rooms = (ArrayList<Room>) obj;
+                        int ID = 500;
+                        for (Room r : rooms) {
+                            Button btn = new Button(aServers.this);
+                            btn.setId(ID);
+                            btn.setText(r.Name + "  " + Integer.toString(r.playerCount) + '/' + Integer.toString(r.playerLimit));
 
-        if (obj instanceof ArrayList) {
-            try {
-                rooms = (ArrayList<Room>) obj;
-                int ID = 500;
-                for (Room r : rooms) {
-                    Button btn = new Button(this);
-                    btn.setId(ID);
-                    btn.setText(r.Name + "  " + Integer.toString(r.playerCount) + '/' + Integer.toString(r.playerLimit));
+                            btn.setOnClickListener(bServerClick);
+                            serverList.addView(btn);
 
-                    btn.setOnClickListener(bServerClick);
-                    serverList.addView(btn);
+                            ID++;
+                        }
+                        progressBar.setVisibility(View.INVISIBLE);
+                        textConnection.setVisibility(View.INVISIBLE);
 
-                    ID++;
+                    } catch (ClassCastException e) {
+                        AlertDialog.Builder dlgAlert = new AlertDialog.Builder(aServers.this);
+
+                        dlgAlert.setMessage("ArrayList generic is not of type <Room>");
+
+                        dlgAlert.setTitle("Error while passing server list");
+                        dlgAlert.setPositiveButton("OK", null);
+                        dlgAlert.setCancelable(true);
+                        dlgAlert.create().show();
+                    }
                 }
-
-            } catch (ClassCastException e) {
-                AlertDialog.Builder dlgAlert = new AlertDialog.Builder(aServers.this);
-
-                dlgAlert.setMessage("ArrayList generic is not of type <Room>");
-
-                dlgAlert.setTitle("Error while passing server list");
-                dlgAlert.setPositiveButton("OK", null);
-                dlgAlert.setCancelable(true);
-                dlgAlert.create().show();
             }
-        }
+        });
     }
 
     @Override
     public void onEventFailed(Object obj) {
         textConnection.setVisibility(View.VISIBLE);
-        progressBar.setVisibility(View.GONE);
+        progressBar.setVisibility(View.INVISIBLE);
 
         String err;
 
