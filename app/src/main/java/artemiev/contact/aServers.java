@@ -21,6 +21,8 @@ public class aServers extends AppCompatActivity
 
     public ArrayList<Room> rooms;
 
+    private CoordinatorClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +36,27 @@ public class aServers extends AppCompatActivity
         textConnection.setVisibility(View.INVISIBLE);
 
         WebSocketClient.setEventListener(this);
-        WebSocketClient.fetchRoomList();
+
+        if (WebSocketClient.getMode() != WebSocketClient.ClientMode.mCoordinator) {
+            try {
+                WebSocketClient.changeMode(WebSocketClient.ClientMode.mCoordinator);
+            }
+            catch (Exception e) {
+                AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(aServers.this);
+
+                dlgAlert.setMessage(e.getMessage());
+
+                dlgAlert.setTitle("Error while contacting server");
+                dlgAlert.setPositiveButton("OK", null);
+                dlgAlert.setCancelable(true);
+                dlgAlert.create().show();
+
+                e.printStackTrace();
+            }
+        }
+
+        client = (CoordinatorClient) WebSocketClient.client;
+        client.fetchRoomList();
         //ArrayList ButtonArray = new ArrayList(8);
         //(Button) ButtonArray.get(0)
         //ButtonArray.add(btn)

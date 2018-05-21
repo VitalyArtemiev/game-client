@@ -2,6 +2,7 @@ apply plugin: 'com.android.library'
 
 buildscript {
     repositories {
+	google()
         jcenter()
     }
 
@@ -22,8 +23,8 @@ dependencies {
         ext.gms_library_version =
     }*/
 
-    implementation "com.android.support:appcompat-v7:25.4.0"
-    implementation "com.android.support:support-v4:25.4.0"
+    implementation "com.android.support:appcompat-v7:$supportlib_version"
+    implementation "com.android.support:support-v4:$supportlib_version"
     implementation "com.google.android.gms:play-services-games:15.0.0"
     implementation "com.google.android.gms:play-services-plus:15.0.0"
 }

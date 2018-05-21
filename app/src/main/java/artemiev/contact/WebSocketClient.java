@@ -21,11 +21,11 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 import java.net.URI;
+
+import static artemiev.contact.WebSocketClient.ClientMode.mCoordinator;
+import static artemiev.contact.WebSocketClient.ClientMode.mDisconnected;
 
 /**
  * 46   * This is an example of a WebSocket client.
@@ -41,12 +41,22 @@ import java.net.URI;
  * 56   * as this is the default.
  * 57
  */
-public final class WebSocketClient /*implements ClientInterface*/{
-    static final String URL = System.getProperty("url", "ws://192.168.1.34:8080/websocket");
-    private static MyEventListener EventListener;
+public final class WebSocketClient {//Todo: static is bad, use application scope
+    public enum ClientMode {
+        mDisconnected, mCoordinator, mGameServer
+    };
+
+    private static ClientMode mode = mCoordinator;
+
+    private final static String coordinatorURL = System.getProperty("url", "ws://192.168.1.58:8080/websocket"); //Todo: change into array of queued addresses
+    private final static String gameServerURL = System.getProperty("url", "ws://192.168.1.58:8080/websocket"); //Todo: new server address goes here
+
+    private static String currentURL = coordinatorURL;
+
+    private static MyEventListener eventListener;
 
     public static void setEventListener(MyEventListener el) {
-        EventListener = el;
+        eventListener = el;
         handler.setEventListener(el);
     }
 
@@ -54,8 +64,32 @@ public final class WebSocketClient /*implements ClientInterface*/{
     private static WebSocketClientHandler handler;
     private static Channel ch;
 
+    public static CustomClient client;
+
+    public static ClientMode getMode() {
+        return mode;
+    }
+
+    public static void changeMode(ClientMode m) throws Exception {
+        shutdown();
+        mode = m;
+        switch (mode) {
+            case mCoordinator: {
+                client = new CoordinatorClient(ch, eventListener);
+                currentURL = coordinatorURL;
+                break;
+            }
+            case mGameServer:  {
+                client = new GameServerClient(ch, eventListener);
+                currentURL = gameServerURL;
+                break;
+            }
+        }
+        startup();
+    }
+
     public static void startup() throws Exception {
-        URI uri = new URI(URL);
+        URI uri = new URI(currentURL);
         String scheme = uri.getScheme() == null ? "ws" : uri.getScheme();
         final String host = uri.getHost() == null ? "192.168.1.34" : uri.getHost();
         final int port;
@@ -124,18 +158,26 @@ public final class WebSocketClient /*implements ClientInterface*/{
 
             handler.handshakeFuture().sync();
 
+            client = new CoordinatorClient(ch, eventListener);
 
         } catch (Exception e) {
             group.shutdownGracefully();
+
+            mode = mDisconnected;
             throw e;
         }
     }
 
     public static void shutdown() {
+        try {
+            closeConnection();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         group.shutdownGracefully();
     }
 
-    private static boolean connectionActive(boolean tryReconnect) { //ToDO: this is messy
+    public static boolean connectionActive(boolean tryReconnect) { //ToDO: this is messy
         boolean result = ch != null;
         try {
             if (tryReconnect && !result)
@@ -148,68 +190,25 @@ public final class WebSocketClient /*implements ClientInterface*/{
         }
     }
 
+    public static void closeConnection() throws InterruptedException {
+        if (ch == null) {
+            return;
+        }
+        ch.writeAndFlush(new CloseWebSocketFrame());
+        ch.closeFuture().sync();
+    }
+
     public static void pingServer() {
         WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[]{8, 1, 8, 1}));
         ch.writeAndFlush(frame);
     }
 
-    public static void closeConnection() throws InterruptedException {
-        ch.writeAndFlush(new CloseWebSocketFrame());
-        ch.closeFuture().sync();
-    }
-
-    private static String formRequest() {//variable parameter type and number
-        String result = "";
-
-        //Todo: form correct request
-
-        return result;
-    }
-
-    public static void register(String nickName) {
-        WebSocketFrame frame = new TextWebSocketFrame("registerPlayer\n" + Integer.toString(Player.ID) + '\n' + nickName + '\n');
-        ch.writeAndFlush(frame);
-    }
-
-    public static void fetchRoomList() {
-        if (connectionActive(true)) {
-            WebSocketFrame frame = new TextWebSocketFrame("getRoomList\n"); //Todo: use formRequest()
-
-            ChannelFuture fut = ch.writeAndFlush(frame);
-
-            try {
-                fut.sync();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            if (!fut.isSuccess()) {
-                EventListener.onEventFailed("Failed to send request");
-            }
-
-        } else {
-            EventListener.onEventFailed("Failed to establish connection");
+    public static ChannelFuture sendRequest(String s, int... ints) {//variable parameter type and number
+        String result = s + '\n';
+        for (int i : ints) {
+            result+= Integer.toString(i) + '\n';
         }
-
-    }
-
-    public static void fetchRoomData(int roomID) {
-        WebSocketFrame frame = new TextWebSocketFrame("getRoomData\n" + Integer.toString(roomID) + '\n');
-        ch.writeAndFlush(frame);
-    }
-
-    public static void createRoom() {
-        WebSocketFrame frame = new TextWebSocketFrame("createRoom\n" + Integer.toString(Player.ID) + '\n');
-        ch.writeAndFlush(frame);
-    }
-
-    public static void enterRoom(int roomID) {
-        WebSocketFrame frame = new TextWebSocketFrame("enterRoom\n" + Integer.toString(roomID) + '\n' + Integer.toString(Player.ID) + '\n');
-        ch.writeAndFlush(frame);
-    }
-
-    public static void leaveRoom() {
-        WebSocketFrame frame = new TextWebSocketFrame("enterRoom\n" + Integer.toString(Player.ID) + '\n');
-        ch.writeAndFlush(frame);
+        WebSocketFrame frame = new TextWebSocketFrame(result);
+        return ch.writeAndFlush(frame);//todo: notify handler?
     }
 }

@@ -15,40 +15,29 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    implementation 'com.android.support:multidex:1.0.1'
+    implementation 'com.android.support:multidex:1.0.3'
     implementation project(':BaseGameUtils')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'com.android.support:appcompat-v7:25.4.0'
+    implementation "com.android.support:appcompat-v7:$supportlib_version"
     implementation 'com.android.support.constraint:constraint-layout:1.1.0'
-    implementation 'com.android.support:support-v4:25.4.0'
-    implementation 'com.android.support:design:25.4.0'
+    implementation "com.android.support:support-v4:$supportlib_version"
+    implementation "com.android.support:design:$supportlib_version"
     implementation "com.google.android.gms:play-services-games:15.0.0"
     implementation "com.google.android.gms:play-services-plus:15.0.0"
     implementation 'com.google.android.gms:play-services-auth:15.0.0'
-    implementation 'com.android.support:support-vector-drawable:25.4.0'
+    implementation "com.android.support:support-vector-drawable:$supportlib_version"
     implementation 'com.jcraft:jzlib:1.1.2'
     implementation 'io.netty:netty-all:4.1.23.Final'
 
     testImplementation 'junit:junit:4.12'
-}
-
-configurations.all {
-    resolutionStrategy.eachDependency { DependencyResolveDetails details ->
-        def requested = details.requested
-        if (requested.group == 'com.android.support') {
-            if (!requested.name.startsWith("multidex")) {
-                details.useVersion '25.4.0'
-            }
-        }
-    }
 }
