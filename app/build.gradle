@@ -38,6 +38,7 @@ dependencies {
     implementation "com.android.support:support-vector-drawable:$supportlib_version"
     implementation 'com.jcraft:jzlib:1.1.2'
     implementation 'io.netty:netty-all:4.1.23.Final'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.5'
 
     testImplementation 'junit:junit:4.12'
 }

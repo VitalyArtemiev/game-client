@@ -2,8 +2,8 @@ package artemiev.contact;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -18,6 +18,7 @@ public class aServers extends AppCompatActivity
     private LinearLayout serverList;
     private ProgressBar progressBar;
     private EditText textConnection;
+    private Button bNewServer;
 
     public ArrayList<Room> rooms;
 
@@ -34,6 +35,9 @@ public class aServers extends AppCompatActivity
 
         textConnection = (EditText) findViewById(R.id.textConnection);
         textConnection.setVisibility(View.INVISIBLE);
+
+        bNewServer = (Button) findViewById(R.id.BNewServer);
+        bNewServer.setOnClickListener(bServerClick);
 
         WebSocketClient.setEventListener(this);
 
@@ -69,9 +73,20 @@ public class aServers extends AppCompatActivity
             AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(aServers.this);
 
             switch (v.getId()) {
+                case R.id.BNewServer: {
+                    try {
+                        WebSocketClient.pingServer();
+                        //WebSocketClient.changeMode(WebSocketClient.ClientMode.mGameServer);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+
                 case R.id.scrollView: {
                     progressBar.setVisibility(View.VISIBLE);
                     textConnection.setVisibility(View.INVISIBLE);
+                    break;
                 }
                 case 500: dlgAlert.setMessage("1"); break;
                 case 501: dlgAlert.setMessage("2"); break;
