@@ -75,6 +75,7 @@ public class aServers extends AppCompatActivity
             switch (v.getId()) {
                 case R.id.BNewServer: {
                     try {
+                        client.createRoom();
                         WebSocketClient.pingServer();
                         //WebSocketClient.changeMode(WebSocketClient.ClientMode.mGameServer);
                     } catch (Exception e) {

@@ -114,7 +114,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
                 ArrayList<Room> rooms = new ArrayList<>();
                 for (JsonNode roomNode: roomsNode) {
                     int roomId = roomNode.path("id").asInt(-1);
-                    String roomName = roomNode.path("id").asText("name missing");
+                    String roomName = roomNode.path("name").asText("name missing");
                     int playerCount = roomNode.path("playerCount").asInt(-1);
                     int playerLimit = roomNode.path("playerLimit").asInt(-1);
 

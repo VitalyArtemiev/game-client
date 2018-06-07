@@ -48,7 +48,14 @@ public class CoordinatorClient extends CustomClient implements ClientInterface {
     }
 
     public void createRoom() {
-        sendRequest("createRoom", Player.ID);
+        sendRequest("{\n" +
+                "  \"message\": {\n" +
+                "    \"request\" : \"newRoom\",\n" +
+                "    \"roomName\" : \"firstroom\",\n" +
+                "    \"playerLimit\":  8,\n" +
+                "    \"id\" : 0\n" +
+                "  }\n" +
+                "}", Player.ID);
     }
 
     public void enterRoom(int roomID) {

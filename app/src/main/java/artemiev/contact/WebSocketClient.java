@@ -48,7 +48,7 @@ public final class WebSocketClient {//Todo: static is bad, use application scope
 
     private static ClientMode mode = mCoordinator;
 
-    private final static String coordinatorURL = System.getProperty("url", "ws://192.168.1.58:8080/websocket"); //Todo: change into array of queued addresses
+    private final static String coordinatorURL = System.getProperty("url", "ws://80.240.212.66:8081/websocket"); //Todo: change into array of queued addresses
     private final static String gameServerURL = System.getProperty("url", "ws://192.168.1.58:8080/websocket"); //Todo: new server address goes here
 
     private static String currentURL = coordinatorURL;
