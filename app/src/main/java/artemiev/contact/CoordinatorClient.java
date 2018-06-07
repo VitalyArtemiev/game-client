@@ -20,7 +20,12 @@ public class CoordinatorClient extends CustomClient implements ClientInterface {
 
     public void fetchRoomList() {
         if (connectionActive(true)) {
-            ChannelFuture fut = sendRequest("getRoomList");
+            ChannelFuture fut = sendRequest("{\n" +
+                    "  \"message\": {\n" +
+                    "    \"request\" : \"roomList\",\n" +
+                    "    \"id\": 0\n" +
+                    "  }\n" +
+                    "}");
 
             try {
                 fut.sync();

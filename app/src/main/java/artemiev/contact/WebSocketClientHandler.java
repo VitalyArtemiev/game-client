@@ -1,5 +1,11 @@
 package artemiev.contact;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 import io.netty.channel.Channel;
@@ -88,55 +94,35 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
     private void tryParseTextResponse(String response) {
         //roomList\n roomNumber \n roomId <space> roomName <space> playerCount <space> playerLimit \n
 
-        String[] tokens = response.split("[\n]");
-        switch (tokens[0]) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode rootNode = null;
+        try {
+            rootNode = objectMapper.readTree(response);
+        } catch (IOException e) {
+
+        }
+
+        JsonNode message = rootNode.path("message");
+
+        JsonNode temp= message.path("response");
+        String task = temp.path("task").asText();
+
+        switch (task) {
             case "roomList": {
+                JsonNode roomsNode = temp.path("room");
                 ArrayList<Room> rooms = new ArrayList<>();
-                int l = tokens.length;
-                if (l < 2)
-                    break;
-
-                int roomNumber = Integer.parseInt(tokens[1]);
-
-                if (roomNumber == 0) {
-                    //ToDo handle rooms not found
-                    if (EventListener != null)
-                        EventListener.onEventFailed("rooms not found");
-                }
-                if (roomNumber + 2 != l) {
-                    //ToDO handle incorrect response
-                    if (EventListener != null)
-                        EventListener.onEventFailed("roomNumber + 2 != l");
-                }
-
-                for (int i = 0; i < roomNumber; i++) {
-                    String[] roomParams = tokens[i+2].split("[ ]");
-
-                    if (roomParams.length != 4) {
-                        //ToDo handle incorrect response
-                        if (EventListener != null)
-                            EventListener.onEventFailed("roomParams fail");
-                    }
-
-                    int roomId = Integer.parseInt(roomParams[0]);
-                    String roomName = roomParams[1];
-                    int playerCount = Integer.parseInt(roomParams[2]);
-                    int playerLimit = Integer.parseInt(roomParams[3]);
+                for (JsonNode roomNode: roomsNode) {
+                    int roomId = roomNode.path("id").asInt(-1);
+                    String roomName = roomNode.path("id").asText("name missing");
+                    int playerCount = roomNode.path("playerCount").asInt(-1);
+                    int playerLimit = roomNode.path("playerLimit").asInt(-1);
 
                     rooms.add(new Room(roomId, roomName, playerCount, playerLimit));
+                    if (EventListener != null)
+                        EventListener.onEventCompleted(rooms);
                 }
-
-                if (EventListener != null)
-                    EventListener.onEventCompleted(rooms);
-
                 break;
-            }
-            case "roomData": {
-
-                break;
-            }
-            default: {
-
             }
         }
     }
